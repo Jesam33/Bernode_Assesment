@@ -1,46 +1,62 @@
 <template>
-    <div class="mt-2 w-full space-y-2 ">
-        <h1 class="text-[17px] text-[#181919] font-[600]">{{ label }}*</h1>
-        <input :v-model={ItemModel} class="rounded-[15px] border border-black  outline-none h-[50px] w-full px-3" id="ItemId" :type="ItemType" />
-    </div>
-    <span id={ItemError} class="error">vvvhhv</span>
+  <div>
+    <h1 
+      class="text-[17px] font-[600]" 
+      :class="{'text-red-500': hasError}"
+    >
+      {{ label }}*
+    </h1>
+    <input
+      :type="ItemType || 'text'"
+      v-model="localValue"
+      :class="[
+        'rounded-[15px] border border-black outline-none h-[50px] w-full px-3', 
+        {'border-red-500': hasError}
+      ]"
+      :id="ItemId"
+    />
+    <p class="error" v-if="ItemError">{{ ItemError }}</p>
+  </div>
 </template>
 
 <script>
 export default {
-    name: "FormItem",
-    props: {
-        label: {
-            type: String,
-            required: true
-        },
-        ItemId: {
-            type: String,
-            required: true
-        },
-        ItemType: {
-            type: String,
-            default: "text"
-        },
-        ItemError: {
-            type: String,
-            required: true
-        },
-        ItemModel: {
-            type: String,
-            required: true
-        }
+  name: "FormItem",
+  props: {
+    label: String,
+    ItemId: String,
+    ItemType: String,
+    ItemError: String,
+    modelValue: String,
+  },
+  data() {
+    return {
+      localValue: this.modelValue, // Initialize with the prop value
+    };
+  },
+  computed: {
+    hasError() {
+      return !!this.ItemError; // Returns true if there's an error
     }
-}
+  },
+  watch: {
+    // Watch the prop for changes and update localValue accordingly
+    modelValue(newValue) {
+      this.localValue = newValue;
+    },
+    // Watch localValue and emit the change to the parent
+    localValue(newValue) {
+      this.$emit("update:modelValue", newValue);
+    },
+  },
+};
 </script>
 
 <style>
-h1 {
-    font-family: "Open Sans", sans-serif;
-}
 .error {
-    color: red;
-    font-size: 14px;
-    margin-top: 2px;
+  color: red;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 10px;
 }
 </style>

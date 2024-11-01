@@ -9,53 +9,33 @@
       <div class="mt-10 w-full">
         <h1 class="text-[30px] text-[#181919] font-[700]">Let's get started</h1>
         <p class="mt-3 text-[#181919] font-[400]">
-          Enter your information just as it appears on your premium health
-          insurance card or pay stub.
+          Enter your information just as it appears on your premium health insurance card or pay stub.
         </p>
         <p class="mt-4 text-[#181919] font-[300]">*Required</p>
       </div>
       <form @submit.prevent="validate" class="mt-8 space-y-4">
-        <FormItem label="First Name" ItemId="first_name" :ItemError="fnameError"  />
-        <FormItem label="Last Name" ItemId="last_name" />
-        <FormItem label="Email" ItemId="email" :ItemType="'email'" />
-        <SelectFormItem
-          label="Country"
-          ItemId="country"
-          :options="dropdownOptions"
-        />
-        <FormItem label="ZIP Code" ItemId="zip_code" />
-        <SelectFormItem
-          label="Sex assigned at birth"
-          ItemId="sex"
-          :options="dropdownOptions2"
-        />
-        <FormItem label="Date Of Birth" ItemId="DOB" :ItemType="'date'" />
+        <FormItem label="First Name" ItemId="first_name" v-model="first_name" :ItemError="fnameError" />
+        <FormItem label="Last Name" ItemId="last_name" v-model="last_name" :ItemError="lnameError" />
+        <FormItem label="Email" ItemId="email" v-model="email" :ItemError="emailError" :ItemType="'email'" />
+        <SelectFormItem label="Country" ItemId="country" v-model="country" :options="dropdownOptions" />
+        <FormItem label="ZIP Code" ItemId="zip_code" v-model="zip_code" :ItemError="zipCodeError" />
+        <SelectFormItem label="Sex assigned at birth" ItemId="sex" v-model="sex" :options="dropdownOptions2" />
+        <FormItem label="Date Of Birth" ItemId="DOB" v-model="DOB" :ItemError="dobError" :ItemType="'date'" />
 
         <div class="flex gap-3 mt-4">
-          <input
-            class="rounded-[15px] border border-black outline-none h-[20px] w-[20px] px-3"
-            type="checkbox"
-          />
-          <p>
-            I received a Teladoc Health code from my employer or insurance
-            company.
-          </p>
+          <input class="rounded-[15px] border border-black outline-none h-[20px] w-[20px] px-3" type="checkbox" v-model="hasCode" />
+          <p>I received a Teladoc Health code from my employer or insurance company.</p>
         </div>
-        <div class="hidden">
-          <FormItem class="hidden" label="Teladoc Health Code" />
+        <div v-if="hasCode">
+          <FormItem label="Teladoc Health Code" v-model="teladocCode" />
         </div>
         <div class="w-full">
-          <button
-            class="px-3 w-full text-white font-[600] text-[18px] bg-[#5b2f91] py-3 rounded-[12px]"
-          >
-            Next
-          </button>
+          <button class="px-3 w-full text-white font-[600] text-[18px] bg-[#5b2f91] py-3 rounded-[12px]">Next</button>
         </div>
       </form>
     </div>
     <div class="flex w-[80%] border-t pt-6 mx-auto justify-center mt-[10%] text-[13px] gap-4 font-[600]">
       <p class="text-gray-600">© 2002-2024 Teladoc, Inc. All rights reserved.</p>
-      <p class="text-[#5b2f91]">Terms of Service</p>
       <p class="text-[#5b2f91]">Terms of Service</p>
       <p class="text-[#5b2f91]">Notice of Privacy Practices</p>
       <p class="text-[#5b2f91]">Notice of Non-Discrimination and Language Assistance</p>
@@ -75,9 +55,25 @@ export default {
     FormItem,
     SelectFormItem,
   },
-
   data() {
     return {
+      first_name: "",
+      last_name: "",
+      email: "",
+      country: "0",
+      zip_code: "",
+      sex: "0",
+      DOB: "",
+      hasCode: false,
+      teladocCode: "",
+
+      // Error messages
+      fnameError: "",
+      lnameError: "",
+      emailError: "",
+      zipCodeError: "",
+      dobError: "",
+
       dropdownOptions: [
         { value: "0", label: "Please select" },
         { value: "1", label: "United States Of America" },
@@ -221,35 +217,58 @@ export default {
         { value: "139", label: "Panama" },
         { value: "140", label: "Papua New Guinea" },
         { value: "141", label: "Paraguay" },
-        { value: "142", label: "Peru" },
-        // ...other options
+        { value: "142", label: "Peru" }
+        // ... other countries
       ],
       dropdownOptions2: [
         { value: "0", label: "Please select" },
-        { value: "option1", label: "Male" },
-        { value: "option2", label: "Female" },
-        { value: "option3", label: "Other" },
+        { value: "1", label: "Male" },
+        { value: "2", label: "Female" },
+        { value: "3", label: "Other" },
       ],
-      fnameError: "", // Add this for error display
     };
   },
-  
   methods: {
+    isValidEmail(email) {
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailPattern.test(email);
+    },
     validate() {
-      // document.getElementById("fnameError").innerText = "hrhrh";
-      alert("Please")
+      // Reset error messages
+      this.fnameError = this.lnameError = this.emailError = this.zipCodeError = this.dobError = "";
+
+      // Validation checks
+      if (!this.first_name) {
+        this.fnameError = "First Name is required";
+      }
+      if (!this.last_name) {
+        this.lnameError = "Last Name is required";
+      }
+      if (!this.isValidEmail(this.email)) {
+        this.emailError = "Please enter a valid email address.";
+      }
+      if (this.country === "0") {
+        this.zipCodeError = "ZIP Code is required and should be a number";
+      }
+      if (!this.zip_code || isNaN(this.zip_code)) {
+        this.zipCodeError = "ZIP Code is required and should be a number";
+      }
+      if (this.sex === "0") {
+        this.zipCodeError = "ZIP Code is required and should be a number";
+      }
+      if (!this.DOB) {
+        this.dobError = "Date of Birth is required";
+      }
+
+      // Show success if all fields are valid
+      if (!this.fnameError && !this.lnameError && !this.emailError && !this.zipCodeError && !this.dobError) {
+        alert("Successful Registration, all fields are valid!");
+      }
     },
   },
 };
 </script>
 
-<script setup>
-
-</script>
-
-<style>
-#app {
-  font-family: "Open Sans", sans-serif;
-  color: #2c3e50;
-}
+<style scoped>
+/* Add any component-specific styles here */
 </style>

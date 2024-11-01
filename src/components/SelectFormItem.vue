@@ -1,45 +1,42 @@
 <template>
-  <div class="mt-2 w-full space-y-2 ">
-    <h1 class="text-[17px] text-[#181919] font-[600]">{{ label }}*</h1>
-    <select :id="ItemId" :type="ItemType"  class=" border border-black rounded-[15px] rounded-[15px] h-[50px] w-full px-3">
-      <option
-      class="border border-black"
-        v-for="(option, index) in options"
-        :key="index"
-        :value="option.value"
-      >
+  <div>
+    <label :for="ItemId" class="text-[17px] text-[#181919] font-[600] block mb-2">{{ label }}</label>
+    <select :id="ItemId" v-model="selectedValue" class="rounded-[15px] border border-black outline-none h-[50px] w-full px-3" @change="updateValue">
+      <option v-for="option in options" :key="option.value" :value="option.value">
         {{ option.label }}
       </option>
     </select>
+    <span v-if="SelectItemError" class="text-red-500">{{ SelectItemError }}</span>
   </div>
 </template>
 
 <script>
 export default {
-  name: "SelectFormItem",
   props: {
-    options: {
-      type: Array,
-      required: true,
+    label: String,
+    ItemId: String,
+    value: String,
+    options: Array,
+    SelectItemError: String,
+  },
+  computed: {
+    selectedValue: {
+      get() {
+        return this.value; // Bind the select value to v-model
+      },
+      set(value) {
+        this.$emit('input', value); // Emit the value back to the parent
+      },
     },
-    label: {
-      type: String,
-      required: true,
-    },
-    ItemId: {
-      type: String,
-      required: true,
-    },
-    ItemType: {
-      type: String,
-      default: "text",
+  },
+  methods: {
+    updateValue(event) {
+      this.selectedValue = event.target.value;
     },
   },
 };
 </script>
 
-<style>
-h1 {
-  font-family: "Open Sans", sans-serif;
-}
+<style scoped>
+/* Add any styles specific to your SelectFormItem here */
 </style>
